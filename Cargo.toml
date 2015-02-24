@@ -1,0 +1,5 @@
+[package]
+
+name = "vlcstuff"
+version = "0.0.1"
+authors = ["Ceri Storey <ceri@lshift.net>"]
