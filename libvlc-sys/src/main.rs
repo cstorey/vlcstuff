@@ -1,9 +1,12 @@
+#![feature(unsafe_destructor)]
 mod vlc;
 use std::ptr;
 use std::ffi::{CString,CStr};
 use std::old_io::timer::sleep;
 use std::time::duration::Duration;
 use std::os;
+use std::fmt;
+use std::sync::{Arc, Mutex};
 extern crate libc;
 
 #[derive(Debug)]
@@ -11,93 +14,184 @@ pub enum Foo {
         A(*mut vlc::libvlc_media_player_t)
 }
 
+#[derive(Debug)]
 pub struct VLC {
-        pub inst: *mut vlc::libvlc_instance_t,
-        pub mp: *mut vlc::libvlc_media_player_t,
+        inst: *mut vlc::libvlc_instance_t,
 }
+
+#[derive(Debug)]
+pub struct Player {
+        mp: *mut vlc::libvlc_media_player_t,
+}
+
+#[derive(Debug)]
+pub struct Media {
+        item: *mut vlc::libvlc_media_t,
+}
+
 
 impl VLC {
         pub fn new() -> Option<VLC> {
                 unsafe {
                 let inst = vlc::libvlc_new(0, ptr::null());
-                let mp = vlc::libvlc_media_player_new(inst);
-                Some(VLC { inst: inst, mp: mp })
+                // let mp = vlc::libvlc_media_player_new(inst);
+                Some(VLC { inst: inst })
                 }
         }
+        pub fn new_player(&mut self) -> Player {
+                let mp = unsafe { vlc::libvlc_media_player_new(self.inst) };
+                Player { mp: mp }
+        }
 
-        pub fn open(&mut self, s: &str) {
-                unsafe {
+        pub fn open_media(&mut self, s: &str) -> Media {
                 let sc = CString::new(s).unwrap();
-                let m = vlc::libvlc_media_new_location (self.inst, sc.as_ptr());
-                vlc::libvlc_media_player_set_media(self.mp, m);
-                vlc::libvlc_media_release (m)
-                }
+                let m = unsafe { vlc::libvlc_media_new_location (self.inst, sc.as_ptr()) };
+                Media { item: m }
         }
 }
 
 impl Drop for VLC {
         fn drop(&mut self) {
+                unsafe { vlc::libvlc_release(self.inst) }
+        }
+}
+
+pub struct EventScope<F>  where F : Fn() {
+        handler: F,
+        ev: *mut vlc::libvlc_event_manager_t,
+        evid: i32,
+}
+
+impl <F> EventScope<F> where F : Fn() {
+        pub fn new(player: &Player, f: F) -> Box<EventScope<F>>  {
+                unsafe {
+                        let evid : vlc::libvlc_event_type_t = vlc::libvlc_MediaPlayerPositionChanged as vlc::libvlc_event_type_t;
+                        let ev = vlc::libvlc_media_player_event_manager(player.mp);
+
+                        let mut scope = Box::new(EventScope { ev: ev, evid: evid, handler: f });
+
+                        // sleep (Duration::seconds(1)); /* Let it play a bit */
+                        vlc::libvlc_event_attach(ev, evid,  Some(player_ev_cb::<F>), scope.as_voidp());
+                        println!("New boxed: {:p}", &*scope);
+                        scope
+                }
+        }
+
+        fn as_voidp(&self) -> *mut libc::c_void {
+                &*self as *const _ as *mut libc::c_void
+        }
+}
+
+impl<F> fmt::Debug for EventScope<F> where F : Fn() {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{{ EventScope at {:p}; as voidp: {:?} }}", &*self, self.as_voidp())
+    }
+}
+
+#[unsafe_destructor]
+impl<F> Drop for EventScope<F> where F : Fn() {
+        fn drop(&mut self) {
+                println!("Dropping: {:?}", &self);
+                unsafe { vlc::libvlc_event_detach(self.ev, self.evid, Some(player_ev_cb::<F>), self.as_voidp()); }
+        }
+}
+extern fn player_ev_cb<F>(ev: *const vlc::libvlc_event_t,
+                      arg2: *mut libc::c_void) where F : Fn() {
+        unsafe {
+                let thunk: &EventScope<F> = &mut *(arg2 as *mut EventScope<F>);
+                println!("void* after: {:p}", arg2);
+                println!("EventScope after: {:?}", thunk);
+                // sleep (Duration::seconds(1)); /* Let it play a bit */
+                (thunk.handler)();
+        }
+}
+
+impl Player {
+        pub fn set_media(&mut self, m: &Media) {
+                unsafe { vlc::libvlc_media_player_set_media(self.mp, m.item) }
+        }
+        pub fn get_position(&mut self) -> f32 {
+                println!("Get position: {:?}", self.mp);
+                unsafe { vlc::libvlc_media_player_get_position(self.mp) }
+        }
+
+        pub fn get_media(&mut self) -> Media {
+                let m = unsafe { vlc::libvlc_media_player_get_media(self.mp) };
+                Media { item: m }
+        }
+        pub fn play(&mut self) {
+                let ret = unsafe { vlc::libvlc_media_player_play (self.mp) };
+                println!("Play: {}", ret);
+        }
+        pub fn stop(&mut self) {
+                unsafe { vlc::libvlc_media_player_stop (self.mp) };
+        }
+
+
+        pub fn on_position_changed<F>(&mut self, f: F) -> Box<EventScope<F>> where F : Fn() {
+                // let mut scope = EventScope { handler: Box::new(f) };
+                let mut scope = EventScope::new(self, f);
+                scope
+        }
+}
+
+unsafe impl Send for Player {}
+
+impl Drop for Player {
+        fn drop(&mut self) {
                 unsafe {
                         vlc::libvlc_media_player_release (self.mp);
-                        vlc::libvlc_release(self.inst)
                 }
         }
 }
 
-extern fn ev_callback(ev: *const vlc::libvlc_event_t,
-                      arg2: *mut libc::c_void) {
-        unsafe {
-        let data: &mut Foo = &mut *(arg2 as *mut Foo);
-        let Foo::A(mp) = *data;
-        let e = unsafe { *ev };
-        let frac_pos = vlc::libvlc_media_player_get_position(mp);
-        let m = vlc::libvlc_media_player_get_media(mp);
-        let duration = vlc::libvlc_media_get_duration(m) as f32 / 1000.0;
-        println!("Pos: {}/{} {}s", frac_pos, duration, duration*frac_pos)
+impl Media {
+        pub fn get_duration(&self) -> Duration {
+                let duration_ms = unsafe { vlc::libvlc_media_get_duration(self.item) };
+                Duration::milliseconds(duration_ms)
         }
 }
 
-pub fn xmain() {
-        let mut vlc = VLC::new().unwrap();
-        let args = os::args();
-        let mut a : Vec<_> = args.iter().skip(1).collect();
-        let s = a.pop().unwrap().as_slice();
-        vlc.open(s)
+
+impl Drop for Media {
+        fn drop(&mut self) {
+                unsafe {
+                        vlc::libvlc_media_release (self.item)
+                }
+        }
 }
+
 
 pub fn main() {
-unsafe {
-        let inst = vlc::libvlc_new(0, ptr::null());
-//     /* Create a new item */
+        let mut inst = VLC::new().unwrap();
         let args = os::args();
         let mut a : Vec<_> = args.iter().skip(1).collect();
         let s = a.pop().unwrap().as_slice();
-        let sc = CString::new(s).unwrap();
-        let m = vlc::libvlc_media_new_location (inst, sc.as_ptr());
+        let m = inst.open_media(s);
+        let mpp = Arc::new(Mutex::new(inst.new_player()));
 
-     /* Create a media player playing environement */
-        let mp = vlc::libvlc_media_player_new_from_media (m);
-        let ev = vlc::libvlc_media_player_event_manager(mp);
-        let mut dat = Foo::A(mp);
-        let mut datp : *mut libc::c_void = &mut dat as *mut _ as *mut libc::c_void;
-        let evid : vlc::libvlc_event_type_t = vlc::libvlc_MediaPlayerPositionChanged as vlc::libvlc_event_type_t;
-        vlc::libvlc_event_attach(ev, evid,  Some(ev_callback), datp);
 
-     /* No need to keep the media now */
-        vlc::libvlc_media_release (m);
+        println!("Pre Callback {:?}/{:?}", &mpp as *const _, &args as *const _);
+        let cb = || {
+                println!("Entering Callback {:?}/{:?}", &mpp as *const _, &args as *const _);
+                let ref mut player = mpp.lock().unwrap();
+                println!("Player: {:?}", **player);
+                let frac_base : i32 = 1<<16;
+                let pos_frac = player.get_position();
+                let pos : i32 = (pos_frac * frac_base as f32) as i32;
+                let dur = player.get_media().get_duration();
+                println!("Pos: {}/{}", dur*pos/frac_base, dur)
+        };
 
-     /* play the media_player */
-        let ret = vlc::libvlc_media_player_play (mp);
-        println!("Play: {}", ret);
-//
+        let event;
+         {
+                let ref mut mp = mpp.lock().unwrap();
+                event = mp.on_position_changed(cb);
+                println!("EventScope before: {:?}", event);
+                // println!("EventScope on attach: {:?}", scoped);
+                mp.set_media(&m);
+                mp.play();
+        }
         sleep (Duration::seconds(10)); /* Let it play a bit */
-//
-//     /* Stop playing */
-//     libvlc_media_player_stop (mp);
-//
-//     /* Free the media_player */
-        vlc::libvlc_media_player_release (mp);
-//
-        vlc::libvlc_release(inst)
-}
+        mpp.lock().unwrap().stop();
 }
