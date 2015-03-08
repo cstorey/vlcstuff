@@ -201,17 +201,16 @@ pub fn main() {
 
         let cb = || {
                 let ref mut player = mpp.lock().unwrap();
-                let frac_base : i32 = 1<<16;
                 let pos_frac = player.get_position();
-                let pos : i32 = (pos_frac * frac_base as f32) as i32;
                 let dur = player.get_media().get_duration();
+                let pos = Duration::milliseconds((pos_frac * dur.num_milliseconds() as f32) as i64);
                 let state = player.get_state();
-                println!("State: {:?}; Pos: {}/{}", state, dur*pos/frac_base, dur)
+                println!("State: {:?}; Pos: {}/{}", state, pos, dur)
         };
 
         let pos;
         let ended;
-         {
+        {
                 let ref mut mp = mpp.lock().unwrap();
                 pos = mp.on_position_changed(cb);
                 ended = mp.on_media_end_reached(|| {
