@@ -79,14 +79,13 @@ impl <F> EventScope<F> where F : Fn() {
 
 impl<F> fmt::Debug for EventScope<F> where F : Fn() {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{{ EventScope at {:p}; as voidp: {:?} }}", &*self, self.as_voidp())
+        write!(f, "{{ EventScope at {:p}; }}", &*self)
     }
 }
 
 #[unsafe_destructor]
 impl<F> Drop for EventScope<F> where F : Fn() {
         fn drop(&mut self) {
-                println!("Dropping: {:?}", &self);
                 unsafe { vlc::libvlc_event_detach(self.ev, self.evid, Some(player_ev_cb::<F>), self.as_voidp()); }
         }
 }
