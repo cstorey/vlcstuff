@@ -106,6 +106,34 @@ extern fn player_ev_cb<F>(ev: *const vlc::libvlc_event_t,
         }
 }
 
+#[derive(Debug)]
+pub enum PlayerState {
+        NothingSpecial,
+        Opening,
+        Buffering,
+        Playing,
+        Paused,
+        Stopped,
+        Ended ,
+        Error,
+}
+
+impl PlayerState {
+        pub fn from_native(state: vlc::libvlc_state_t) -> Option<PlayerState> {
+                match state {
+                vlc::libvlc_NothingSpecial => Some(PlayerState::NothingSpecial),
+                vlc::libvlc_Opening  => Some(PlayerState::Opening),
+                vlc::libvlc_Buffering  => Some(PlayerState::Buffering),
+                vlc::libvlc_Playing  => Some(PlayerState::Playing),
+                vlc::libvlc_Paused  => Some(PlayerState::Paused),
+                vlc::libvlc_Stopped  => Some(PlayerState::Stopped),
+                vlc::libvlc_Ended  => Some(PlayerState::Ended),
+                vlc::libvlc_Error  => Some(PlayerState::Error),
+                default => None
+                }
+        }
+}
+
 impl Player {
         pub fn set_media(&mut self, m: &Media) {
                 unsafe { vlc::libvlc_media_player_set_media(self.mp, m.item) }
@@ -119,6 +147,12 @@ impl Player {
                 let m = unsafe { vlc::libvlc_media_player_get_media(self.mp) };
                 Media { item: m }
         }
+
+        pub fn get_state(&mut self) -> Option<PlayerState> {
+                let state = unsafe { vlc::libvlc_media_player_get_state(self.mp) };
+                PlayerState::from_native(state)
+        }
+
         pub fn play(&mut self) {
                 let ret = unsafe { vlc::libvlc_media_player_play (self.mp) };
                 println!("Play: {}", ret);
@@ -180,7 +214,8 @@ pub fn main() {
                 let pos_frac = player.get_position();
                 let pos : i32 = (pos_frac * frac_base as f32) as i32;
                 let dur = player.get_media().get_duration();
-                println!("Pos: {}/{}", dur*pos/frac_base, dur)
+                let state = player.get_state();
+                println!("State: {:?}; Pos: {}/{}", state, dur*pos/frac_base, dur)
         };
 
         let event;
