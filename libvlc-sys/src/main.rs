@@ -63,16 +63,11 @@ pub struct EventScope<F>  where F : Fn() {
 }
 
 impl <F> EventScope<F> where F : Fn() {
-        pub fn new(player: &Player, f: F) -> Box<EventScope<F>>  {
+        pub fn new(player: &Player, evid: vlc::libvlc_event_type_t, f: F) -> Box<EventScope<F>>  {
                 unsafe {
-                        let evid : vlc::libvlc_event_type_t = vlc::libvlc_MediaPlayerPositionChanged as vlc::libvlc_event_type_t;
                         let ev = vlc::libvlc_media_player_event_manager(player.mp);
-
                         let mut scope = Box::new(EventScope { ev: ev, evid: evid, handler: f });
-
-                        // sleep (Duration::seconds(1)); /* Let it play a bit */
                         vlc::libvlc_event_attach(ev, evid,  Some(player_ev_cb::<F>), scope.as_voidp());
-                        println!("New boxed: {:p}", &*scope);
                         scope
                 }
         }
@@ -99,9 +94,6 @@ extern fn player_ev_cb<F>(ev: *const vlc::libvlc_event_t,
                       arg2: *mut libc::c_void) where F : Fn() {
         unsafe {
                 let thunk: &EventScope<F> = &mut *(arg2 as *mut EventScope<F>);
-                println!("void* after: {:p}", arg2);
-                println!("EventScope after: {:?}", thunk);
-                // sleep (Duration::seconds(1)); /* Let it play a bit */
                 (thunk.handler)();
         }
 }
@@ -139,7 +131,6 @@ impl Player {
                 unsafe { vlc::libvlc_media_player_set_media(self.mp, m.item) }
         }
         pub fn get_position(&mut self) -> f32 {
-                println!("Get position: {:?}", self.mp);
                 unsafe { vlc::libvlc_media_player_get_position(self.mp) }
         }
 
@@ -161,11 +152,14 @@ impl Player {
                 unsafe { vlc::libvlc_media_player_stop (self.mp) };
         }
 
-
         pub fn on_position_changed<F>(&mut self, f: F) -> Box<EventScope<F>> where F : Fn() {
-                // let mut scope = EventScope { handler: Box::new(f) };
-                let mut scope = EventScope::new(self, f);
-                scope
+                let evid : vlc::libvlc_event_type_t = vlc::libvlc_MediaPlayerPositionChanged as vlc::libvlc_event_type_t;
+                EventScope::new(self, evid, f)
+        }
+
+        pub fn on_media_end_reached<F>(&mut self, f: F) -> Box<EventScope<F>> where F : Fn() {
+                let evid : vlc::libvlc_event_type_t = vlc::libvlc_MediaPlayerEndReached as vlc::libvlc_event_type_t;
+                EventScope::new(self, evid, f)
         }
 }
 
@@ -205,11 +199,8 @@ pub fn main() {
         let mpp = Arc::new(Mutex::new(inst.new_player()));
 
 
-        println!("Pre Callback {:?}/{:?}", &mpp as *const _, &args as *const _);
         let cb = || {
-                println!("Entering Callback {:?}/{:?}", &mpp as *const _, &args as *const _);
                 let ref mut player = mpp.lock().unwrap();
-                println!("Player: {:?}", **player);
                 let frac_base : i32 = 1<<16;
                 let pos_frac = player.get_position();
                 let pos : i32 = (pos_frac * frac_base as f32) as i32;
@@ -218,12 +209,15 @@ pub fn main() {
                 println!("State: {:?}; Pos: {}/{}", state, dur*pos/frac_base, dur)
         };
 
-        let event;
+        let pos;
+        let ended;
          {
                 let ref mut mp = mpp.lock().unwrap();
-                event = mp.on_position_changed(cb);
-                println!("EventScope before: {:?}", event);
-                // println!("EventScope on attach: {:?}", scoped);
+                pos = mp.on_position_changed(cb);
+                ended = mp.on_media_end_reached(|| {
+                        let ref mut player = mpp.lock().unwrap();
+                        println!("Ended: {:?}", player.get_state());
+                });
                 mp.set_media(&m);
                 mp.play();
         }
