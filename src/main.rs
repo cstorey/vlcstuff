@@ -1,5 +1,5 @@
 #![feature(unsafe_destructor)]
-mod vlc;
+extern crate "libvlc-sys" as vlc;
 use std::ptr;
 use std::ffi::{CString,CStr};
 use std::old_io::timer::sleep;
