@@ -1,20 +1,17 @@
-#![feature(unsafe_destructor)]
+#![feature(old_io, std_misc, core)]
+#![allow(unused_assignments, unused_variables)] // For the scoped event guards below.
 extern crate "vlcstuff" as vlc;
-use std::ptr;
-use std::ffi::{CString,CStr};
 use std::old_io::timer::sleep;
 use std::time::duration::Duration;
-use std::os;
-use std::fmt;
+use std::env;
 use std::sync::{Arc, Mutex};
 use vlc::*;
 
 pub fn main() {
         let mut inst = VLC::new().unwrap();
-        let args = os::args();
-        let mut a : Vec<_> = args.iter().skip(1).collect();
-        let s = a.pop().unwrap().as_slice();
-        let m = inst.open_media(s);
+        let mut a : Vec<_> = env::args().skip(1).collect();
+        let s = a.pop().unwrap();
+        let m = inst.open_media(s.as_slice());
         let mpp = Arc::new(Mutex::new(inst.new_player()));
 
 
@@ -27,12 +24,12 @@ pub fn main() {
                 println!("State: {:?}; Pos: {}/{}", state, pos, dur)
         };
 
-        let pos;
-        let ended;
+        let pos_event_guard;
+        let ended_event_guard;
         {
                 let ref mut mp = mpp.lock().unwrap();
-                pos = mp.on_position_changed(cb);
-                ended = mp.on_media_end_reached(|| {
+                pos_event_guard = mp.on_position_changed(cb);
+                ended_event_guard = mp.on_media_end_reached(|| {
                         let ref mut player = mpp.lock().unwrap();
                         println!("Ended: {:?}", player.get_state());
                 });
