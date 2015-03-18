@@ -1,0 +1,22 @@
+# Render with mscgen
+msc {
+  user, queue,player;
+  user -> queue [ label="enqueue $a" ];
+  queue -> player [ label="queue ($a | )" ];
+  player ->* [ label="now playing $a" ];
+  queue ->* [ label="queue ($a | )" ];
+  user -> queue [ label="enqueue $b" ];
+  queue ->* [ label="queue ($a | $b )" ];
+  user -> queue [ label="enqueue $c" ];
+  queue ->* [ label="queue ($a | $b $c)" ];
+  ...;
+  player ->* [ label="finished $a" ];
+  queue ->* [ label="queue ($b | $c)" ];
+  ...;
+  player ->* [ label="finished $b" ];
+  queue ->* [ label="queue ($c | )" ];
+  ...;
+  player ->* [ label="finished $c" ];
+  queue ->* [ label="queue ()" ];
+}
+
