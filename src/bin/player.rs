@@ -11,7 +11,7 @@ pub fn main() {
         let mut inst = VLC::new().unwrap();
         let mut a : Vec<_> = env::args().skip(1).collect();
         let s = a.pop().unwrap();
-        let m = inst.open_media(s.as_slice());
+        let m = inst.open_location(s.as_slice());
         let mpp = Arc::new(Mutex::new(inst.new_player()));
 
 

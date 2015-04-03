@@ -39,7 +39,7 @@ impl VLC {
                 Player { mp: mp }
         }
 
-        pub fn open_media(&mut self, s: &str) -> Media {
+        pub fn open_location(&mut self, s: &str) -> Media {
                 let sc = CString::new(s).unwrap();
                 let m = unsafe { vlc::libvlc_media_new_location (self.inst, sc.as_ptr()) };
                 Media { item: m }
