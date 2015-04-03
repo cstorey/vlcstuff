@@ -5,6 +5,7 @@ extern crate libvlc_sys as vlc;
 extern crate time;
 use std::ptr;
 use std::ffi::{CString,CStr};
+use std::str;
 use time::Duration;
 use std::os;
 use std::fmt;
@@ -176,10 +177,18 @@ impl Drop for Player {
 }
 
 impl Media {
-        pub fn get_duration(&self) -> Duration {
-                let duration_ms = unsafe { vlc::libvlc_media_get_duration(self.item) };
-                Duration::milliseconds(duration_ms)
-        }
+    pub fn get_duration(&self) -> Duration {
+            let duration_ms = unsafe { vlc::libvlc_media_get_duration(self.item) };
+            Duration::milliseconds(duration_ms)
+    }
+    fn _parse_meta(&self) {
+        unsafe { vlc::libvlc_media_parse(self.item) }
+    }
+    pub fn get_trackname(&self) -> &str {
+        self._parse_meta();
+        let s = unsafe { CStr::from_ptr(vlc::libvlc_media_get_meta(self.item, vlc::libvlc_meta_Title)) };
+        str::from_utf8(s.to_bytes()).unwrap()
+    }
 }
 
 
