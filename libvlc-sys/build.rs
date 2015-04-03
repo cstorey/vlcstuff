@@ -1,4 +1,4 @@
-extern crate "pkg-config" as pkg_config;
+extern crate pkg_config;
 
 fn main() {
         match pkg_config::Config::new().atleast_version("2.0.0").find("libvlc") {

@@ -1,9 +1,10 @@
 #![feature(unsafe_destructor)]
-extern crate "libvlc-sys" as vlc;
+#![feature(libc)]
+extern crate libvlc_sys as vlc;
+extern crate time;
 use std::ptr;
 use std::ffi::{CString,CStr};
-use std::old_io::timer::sleep;
-use std::time::duration::Duration;
+use time::Duration;
 use std::os;
 use std::fmt;
 use std::sync::{Arc, Mutex};

@@ -1,6 +1,6 @@
 #![feature(old_io, std_misc, core)]
 #![allow(unused_assignments, unused_variables)] // For the scoped event guards below.
-extern crate "vlcstuff" as vlc;
+extern crate vlcstuff as vlc;
 use std::old_io::timer::sleep;
 use std::time::duration::Duration;
 use std::env;

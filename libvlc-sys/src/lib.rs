@@ -38,7 +38,6 @@ pub type libvlc_time_t = int64_t;
 pub enum Struct_libvlc_log_iterator_t { }
 pub type libvlc_log_iterator_t = Struct_libvlc_log_iterator_t;
 #[repr(C)]
-#[derive(Copy)]
 pub struct Struct_libvlc_log_message_t {
     pub i_severity: libc::c_int,
     pub psz_type: *const libc::c_char,
@@ -67,7 +66,6 @@ pub const LIBVLC_ERROR: libc::c_uint = 4;
 pub enum Struct_vlc_log_t { }
 pub type libvlc_log_t = Struct_vlc_log_t;
 #[repr(C)]
-#[derive(Copy)]
 pub struct Struct_libvlc_module_description_t {
     pub psz_name: *mut libc::c_char,
     pub psz_shortname: *mut libc::c_char,
@@ -122,7 +120,6 @@ pub const libvlc_track_video: libc::c_int = 1;
 pub const libvlc_track_text: libc::c_int = 2;
 pub type libvlc_track_type_t = Enum_libvlc_track_type_t;
 #[repr(C)]
-#[derive(Copy)]
 pub struct Struct_libvlc_media_stats_t {
     pub i_read_bytes: libc::c_int,
     pub f_input_bitrate: libc::c_float,
@@ -147,7 +144,6 @@ impl ::std::default::Default for Struct_libvlc_media_stats_t {
 }
 pub type libvlc_media_stats_t = Struct_libvlc_media_stats_t;
 #[repr(C)]
-#[derive(Copy)]
 pub struct Struct_libvlc_media_track_info_t {
     pub i_codec: uint32_t,
     pub i_id: libc::c_int,
@@ -162,7 +158,6 @@ impl ::std::default::Default for Struct_libvlc_media_track_info_t {
     }
 }
 #[repr(C)]
-#[derive(Copy)]
 pub struct Union_Unnamed2 {
     pub _bindgen_data_: [u32; 2usize],
 }
@@ -178,7 +173,6 @@ impl ::std::default::Default for Union_Unnamed2 {
     fn default() -> Union_Unnamed2 { unsafe { ::std::mem::zeroed() } }
 }
 #[repr(C)]
-#[derive(Copy)]
 pub struct Struct_Unnamed3 {
     pub i_channels: libc::c_uint,
     pub i_rate: libc::c_uint,
@@ -187,7 +181,6 @@ impl ::std::default::Default for Struct_Unnamed3 {
     fn default() -> Struct_Unnamed3 { unsafe { ::std::mem::zeroed() } }
 }
 #[repr(C)]
-#[derive(Copy)]
 pub struct Struct_Unnamed4 {
     pub i_height: libc::c_uint,
     pub i_width: libc::c_uint,
@@ -197,7 +190,6 @@ impl ::std::default::Default for Struct_Unnamed4 {
 }
 pub type libvlc_media_track_info_t = Struct_libvlc_media_track_info_t;
 #[repr(C)]
-#[derive(Copy)]
 pub struct Struct_libvlc_audio_track_t {
     pub i_channels: libc::c_uint,
     pub i_rate: libc::c_uint,
@@ -209,7 +201,6 @@ impl ::std::default::Default for Struct_libvlc_audio_track_t {
 }
 pub type libvlc_audio_track_t = Struct_libvlc_audio_track_t;
 #[repr(C)]
-#[derive(Copy)]
 pub struct Struct_libvlc_video_track_t {
     pub i_height: libc::c_uint,
     pub i_width: libc::c_uint,
@@ -225,7 +216,6 @@ impl ::std::default::Default for Struct_libvlc_video_track_t {
 }
 pub type libvlc_video_track_t = Struct_libvlc_video_track_t;
 #[repr(C)]
-#[derive(Copy)]
 pub struct Struct_libvlc_subtitle_track_t {
     pub psz_encoding: *mut libc::c_char,
 }
@@ -236,7 +226,6 @@ impl ::std::default::Default for Struct_libvlc_subtitle_track_t {
 }
 pub type libvlc_subtitle_track_t = Struct_libvlc_subtitle_track_t;
 #[repr(C)]
-#[derive(Copy)]
 pub struct Struct_libvlc_media_track_t {
     pub i_codec: uint32_t,
     pub i_original_fourcc: uint32_t,
@@ -270,7 +259,6 @@ pub enum Struct_libvlc_media_list_t { }
 pub enum Struct_libvlc_media_player_t { }
 pub type libvlc_media_player_t = Struct_libvlc_media_player_t;
 #[repr(C)]
-#[derive(Copy)]
 pub struct Struct_libvlc_track_description_t {
     pub i_id: libc::c_int,
     pub psz_name: *mut libc::c_char,
@@ -283,7 +271,6 @@ impl ::std::default::Default for Struct_libvlc_track_description_t {
 }
 pub type libvlc_track_description_t = Struct_libvlc_track_description_t;
 #[repr(C)]
-#[derive(Copy)]
 pub struct Struct_libvlc_audio_output_t {
     pub psz_name: *mut libc::c_char,
     pub psz_description: *mut libc::c_char,
@@ -296,7 +283,6 @@ impl ::std::default::Default for Struct_libvlc_audio_output_t {
 }
 pub type libvlc_audio_output_t = Struct_libvlc_audio_output_t;
 #[repr(C)]
-#[derive(Copy)]
 pub struct Struct_libvlc_audio_output_device_t {
     pub p_next: *mut Struct_libvlc_audio_output_device_t,
     pub psz_device: *mut libc::c_char,
@@ -309,7 +295,6 @@ impl ::std::default::Default for Struct_libvlc_audio_output_device_t {
 }
 pub type libvlc_audio_output_device_t = Struct_libvlc_audio_output_device_t;
 #[repr(C)]
-#[derive(Copy)]
 pub struct Struct_libvlc_rectangle_t {
     pub top: libc::c_int,
     pub left: libc::c_int,
@@ -509,7 +494,6 @@ pub const libvlc_VlmMediaInstanceStatusPause: libc::c_uint = 1544;
 pub const libvlc_VlmMediaInstanceStatusEnd: libc::c_uint = 1545;
 pub const libvlc_VlmMediaInstanceStatusError: libc::c_uint = 1546;
 #[repr(C)]
-#[derive(Copy)]
 pub struct Struct_libvlc_event_t {
     pub _type: libc::c_int,
     pub p_obj: *mut libc::c_void,
@@ -519,7 +503,6 @@ impl ::std::default::Default for Struct_libvlc_event_t {
     fn default() -> Struct_libvlc_event_t { unsafe { ::std::mem::zeroed() } }
 }
 #[repr(C)]
-#[derive(Copy)]
 pub struct Union_Unnamed5 {
     pub _bindgen_data_: [u64; 2usize],
 }
@@ -611,7 +594,6 @@ impl ::std::default::Default for Union_Unnamed5 {
     fn default() -> Union_Unnamed5 { unsafe { ::std::mem::zeroed() } }
 }
 #[repr(C)]
-#[derive(Copy)]
 pub struct Struct_Unnamed6 {
     pub meta_type: libvlc_meta_t,
 }
@@ -619,7 +601,6 @@ impl ::std::default::Default for Struct_Unnamed6 {
     fn default() -> Struct_Unnamed6 { unsafe { ::std::mem::zeroed() } }
 }
 #[repr(C)]
-#[derive(Copy)]
 pub struct Struct_Unnamed7 {
     pub new_child: *mut libvlc_media_t,
 }
@@ -627,7 +608,6 @@ impl ::std::default::Default for Struct_Unnamed7 {
     fn default() -> Struct_Unnamed7 { unsafe { ::std::mem::zeroed() } }
 }
 #[repr(C)]
-#[derive(Copy)]
 pub struct Struct_Unnamed8 {
     pub new_duration: int64_t,
 }
@@ -635,7 +615,6 @@ impl ::std::default::Default for Struct_Unnamed8 {
     fn default() -> Struct_Unnamed8 { unsafe { ::std::mem::zeroed() } }
 }
 #[repr(C)]
-#[derive(Copy)]
 pub struct Struct_Unnamed9 {
     pub new_status: libc::c_int,
 }
@@ -643,7 +622,6 @@ impl ::std::default::Default for Struct_Unnamed9 {
     fn default() -> Struct_Unnamed9 { unsafe { ::std::mem::zeroed() } }
 }
 #[repr(C)]
-#[derive(Copy)]
 pub struct Struct_Unnamed10 {
     pub md: *mut libvlc_media_t,
 }
@@ -651,7 +629,6 @@ impl ::std::default::Default for Struct_Unnamed10 {
     fn default() -> Struct_Unnamed10 { unsafe { ::std::mem::zeroed() } }
 }
 #[repr(C)]
-#[derive(Copy)]
 pub struct Struct_Unnamed11 {
     pub new_state: libvlc_state_t,
 }
@@ -659,7 +636,6 @@ impl ::std::default::Default for Struct_Unnamed11 {
     fn default() -> Struct_Unnamed11 { unsafe { ::std::mem::zeroed() } }
 }
 #[repr(C)]
-#[derive(Copy)]
 pub struct Struct_Unnamed12 {
     pub item: *mut libvlc_media_t,
 }
@@ -667,7 +643,6 @@ impl ::std::default::Default for Struct_Unnamed12 {
     fn default() -> Struct_Unnamed12 { unsafe { ::std::mem::zeroed() } }
 }
 #[repr(C)]
-#[derive(Copy)]
 pub struct Struct_Unnamed13 {
     pub new_cache: libc::c_float,
 }
@@ -675,7 +650,6 @@ impl ::std::default::Default for Struct_Unnamed13 {
     fn default() -> Struct_Unnamed13 { unsafe { ::std::mem::zeroed() } }
 }
 #[repr(C)]
-#[derive(Copy)]
 pub struct Struct_Unnamed14 {
     pub new_position: libc::c_float,
 }
@@ -683,7 +657,6 @@ impl ::std::default::Default for Struct_Unnamed14 {
     fn default() -> Struct_Unnamed14 { unsafe { ::std::mem::zeroed() } }
 }
 #[repr(C)]
-#[derive(Copy)]
 pub struct Struct_Unnamed15 {
     pub new_time: libvlc_time_t,
 }
@@ -691,7 +664,6 @@ impl ::std::default::Default for Struct_Unnamed15 {
     fn default() -> Struct_Unnamed15 { unsafe { ::std::mem::zeroed() } }
 }
 #[repr(C)]
-#[derive(Copy)]
 pub struct Struct_Unnamed16 {
     pub new_title: libc::c_int,
 }
@@ -699,7 +671,6 @@ impl ::std::default::Default for Struct_Unnamed16 {
     fn default() -> Struct_Unnamed16 { unsafe { ::std::mem::zeroed() } }
 }
 #[repr(C)]
-#[derive(Copy)]
 pub struct Struct_Unnamed17 {
     pub new_seekable: libc::c_int,
 }
@@ -707,7 +678,6 @@ impl ::std::default::Default for Struct_Unnamed17 {
     fn default() -> Struct_Unnamed17 { unsafe { ::std::mem::zeroed() } }
 }
 #[repr(C)]
-#[derive(Copy)]
 pub struct Struct_Unnamed18 {
     pub new_pausable: libc::c_int,
 }
@@ -715,7 +685,6 @@ impl ::std::default::Default for Struct_Unnamed18 {
     fn default() -> Struct_Unnamed18 { unsafe { ::std::mem::zeroed() } }
 }
 #[repr(C)]
-#[derive(Copy)]
 pub struct Struct_Unnamed19 {
     pub new_count: libc::c_int,
 }
@@ -723,7 +692,6 @@ impl ::std::default::Default for Struct_Unnamed19 {
     fn default() -> Struct_Unnamed19 { unsafe { ::std::mem::zeroed() } }
 }
 #[repr(C)]
-#[derive(Copy)]
 pub struct Struct_Unnamed20 {
     pub item: *mut libvlc_media_t,
     pub index: libc::c_int,
@@ -732,7 +700,6 @@ impl ::std::default::Default for Struct_Unnamed20 {
     fn default() -> Struct_Unnamed20 { unsafe { ::std::mem::zeroed() } }
 }
 #[repr(C)]
-#[derive(Copy)]
 pub struct Struct_Unnamed21 {
     pub item: *mut libvlc_media_t,
     pub index: libc::c_int,
@@ -741,7 +708,6 @@ impl ::std::default::Default for Struct_Unnamed21 {
     fn default() -> Struct_Unnamed21 { unsafe { ::std::mem::zeroed() } }
 }
 #[repr(C)]
-#[derive(Copy)]
 pub struct Struct_Unnamed22 {
     pub item: *mut libvlc_media_t,
     pub index: libc::c_int,
@@ -750,7 +716,6 @@ impl ::std::default::Default for Struct_Unnamed22 {
     fn default() -> Struct_Unnamed22 { unsafe { ::std::mem::zeroed() } }
 }
 #[repr(C)]
-#[derive(Copy)]
 pub struct Struct_Unnamed23 {
     pub item: *mut libvlc_media_t,
     pub index: libc::c_int,
@@ -759,7 +724,6 @@ impl ::std::default::Default for Struct_Unnamed23 {
     fn default() -> Struct_Unnamed23 { unsafe { ::std::mem::zeroed() } }
 }
 #[repr(C)]
-#[derive(Copy)]
 pub struct Struct_Unnamed24 {
     pub item: *mut libvlc_media_t,
 }
@@ -767,7 +731,6 @@ impl ::std::default::Default for Struct_Unnamed24 {
     fn default() -> Struct_Unnamed24 { unsafe { ::std::mem::zeroed() } }
 }
 #[repr(C)]
-#[derive(Copy)]
 pub struct Struct_Unnamed25 {
     pub psz_filename: *mut libc::c_char,
 }
@@ -775,7 +738,6 @@ impl ::std::default::Default for Struct_Unnamed25 {
     fn default() -> Struct_Unnamed25 { unsafe { ::std::mem::zeroed() } }
 }
 #[repr(C)]
-#[derive(Copy)]
 pub struct Struct_Unnamed26 {
     pub new_length: libvlc_time_t,
 }
@@ -783,7 +745,6 @@ impl ::std::default::Default for Struct_Unnamed26 {
     fn default() -> Struct_Unnamed26 { unsafe { ::std::mem::zeroed() } }
 }
 #[repr(C)]
-#[derive(Copy)]
 pub struct Struct_Unnamed27 {
     pub psz_media_name: *const libc::c_char,
     pub psz_instance_name: *const libc::c_char,
@@ -792,7 +753,6 @@ impl ::std::default::Default for Struct_Unnamed27 {
     fn default() -> Struct_Unnamed27 { unsafe { ::std::mem::zeroed() } }
 }
 #[repr(C)]
-#[derive(Copy)]
 pub struct Struct_Unnamed28 {
     pub new_media: *mut libvlc_media_t,
 }
