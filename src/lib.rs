@@ -1,5 +1,6 @@
 #![feature(unsafe_destructor)]
 #![feature(libc)]
+#![feature(convert)]
 extern crate libvlc_sys as vlc;
 extern crate time;
 use std::ptr;
@@ -8,6 +9,7 @@ use time::Duration;
 use std::os;
 use std::fmt;
 use std::sync::{Arc, Mutex};
+use std::path::Path;
 extern crate libc;
 
 #[derive(Debug)]
@@ -42,6 +44,11 @@ impl VLC {
         pub fn open_location(&mut self, s: &str) -> Media {
                 let sc = CString::new(s).unwrap();
                 let m = unsafe { vlc::libvlc_media_new_location (self.inst, sc.as_ptr()) };
+                Media { item: m }
+        }
+        pub fn open_path(&mut self, p: &Path) -> Media {
+                let sc = p.as_os_str().to_cstring().unwrap();
+                let m = unsafe { vlc::libvlc_media_new_path (self.inst, sc.as_ptr()) };
                 Media { item: m }
         }
 }
